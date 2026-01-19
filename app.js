@@ -36,7 +36,7 @@ app.set("views", path.join(__dirname, "views"));
 // =====================
 const dbUrl = process.env.ATLASDB_URL;
 console.log("DB URL:", process.env.ATLASDB_URL);
-mongoose.connect(dbUrl)
+mongoose.connect(process.env.ATLASDB_URL)
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
 

@@ -33,9 +33,7 @@ const validateListing = (req, res, next) => {
 router.route("/")
     .get(wrapAsync(listings.index))
     //.post(isLoggedIn, validateListing, wrapAsync(listings.createListing));
-    .post(upload.single('listing[image]'),(req,res)=>{
-        res.send(req.file);
-    });
+    .post(isLoggedIn,upload.single('image'),validateListing,wrapAsync(listings.createListing));
 
 // NEW
 router.get("/new", isLoggedIn, listings.renderNewForm);
@@ -43,7 +41,7 @@ router.get("/new", isLoggedIn, listings.renderNewForm);
 // SHOW + UPDATE + DELETE
 router.route("/:id")
     .get(wrapAsync(listings.showListing))
-    .put(isLoggedIn, isOwner,upload.single("listing[image]"), validateListing, wrapAsync(listings.updateListing))
+    .put(isLoggedIn, isOwner,upload.single("image"), validateListing, wrapAsync(listings.updateListing))
     .delete(isLoggedIn, isOwner, wrapAsync(listings.deleteListing));
 
 // EDIT
