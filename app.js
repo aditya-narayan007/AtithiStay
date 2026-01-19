@@ -43,7 +43,7 @@ mongoose.connect(dbUrl)
 // =====================
 // SESSION
 // =====================
-const store = new MongoStore.create({
+const store = new MongoStore({
     mongoUrl : process.env.ATLASDB_URL,
     crypto : {
         secret : process.env.SECRET,
