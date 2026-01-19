@@ -1,0 +1,27 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <div class="alert alert-danger shadow-sm" role="alert">
+                <h4 class="alert-heading">
+                    Oops! Something went wrong
+                </h4>
+
+                <p class="mb-2">
+                    <%= message %>
+                </p>
+
+                <hr>
+
+                <div class="text-end">
+                    <a href="/listings" class="btn btn-sm btn-dark">
+                        Back to Listings
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

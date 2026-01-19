@@ -1,0 +1,157 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+  .listing-image {
+    height: 260px;
+    object-fit: cover;
+  }
+
+  .map-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 0 0 1rem 1rem;
+  }
+</style>
+
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+
+      <h3 class="fw-bold mb-3 text-center"><%= listing.title %></h3>
+
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <!-- LISTING IMAGE -->
+        <img 
+          src="<%= listing.image?.url || 'https://via.placeholder.com/800x500?text=No+Image' %>"
+          class="card-img-top listing-image"
+          alt="Listing image">
+
+        <!-- DETAILS -->
+        <div class="card-body">
+          <p class="mb-1 text-muted">
+            Hosted by <strong>@<%= listing.owner.username %></strong>
+          </p>
+
+          <p class="text-muted mb-2"><%= listing.description %></p>
+
+          <p class="fw-bold mb-1">
+            ₹ <%= listing.price.toLocaleString("en-IN") %> 
+            <span class="fw-normal text-muted">/ night</span>
+          </p>
+
+          <p class="mb-2">
+            <i class="fa-solid fa-location-dot me-1"></i>
+            <%= listing.location %>, <%= listing.country %>
+          </p>
+
+          <% if (currUser && currUser._id.equals(listing.owner._id)) { %>
+            <div class="d-flex gap-2 mt-3">
+              <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-danger">
+                Edit
+              </a>
+              <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                <button class="btn btn-sm btn-outline-dark">
+                  Delete
+                </button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- MAP SECTION -->
+        <div class="border-top">
+
+          <div class="px-3 pt-3">
+            <h6 class="fw-bold mb-2">Where you'll be</h6>
+          </div>
+
+          <% 
+            const coords =
+              listing.geometry &&
+              Array.isArray(listing.geometry.coordinates) &&
+              listing.geometry.coordinates.length === 2
+                ? listing.geometry.coordinates
+                : null;
+          %>
+
+          <% if (coords) { %>
+            <img
+              src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+fe424d(<%= coords[0] %>,<%= coords[1] %>)/<%= coords[0] %>,<%= coords[1] %>,12/600x260?access_token=<%= process.env.MAP_TOKEN %>"
+              class="map-img"
+              alt="Map location">
+          <% } else { %>
+            <p class="text-muted px-3 pb-3">Location map not available</p>
+          <% } %>
+
+        </div>
+
+        <!-- REVIEWS -->
+        <div class="card-body border-top">
+
+          <% if (currUser) { %>
+            <h6 class="fw-bold text-center mb-3">Leave a Review</h6>
+
+            <form action="/listings/<%= listing._id %>/reviews" method="POST">
+
+              <fieldset class="starability-slot mb-3">
+                <legend>Rating</legend>
+                <% for (let i = 1; i <= 5; i++) { %>
+                  <input
+                    type="radio"
+                    id="rate<%= i %>"
+                    name="review[rating]"
+                    value="<%= i %>"
+                    required>
+                  <label for="rate<%= i %>"><%= i %> star</label>
+                <% } %>
+              </fieldset>
+
+              <textarea
+                name="review[comment]"
+                class="form-control mb-2"
+                placeholder="Write your review..."
+                required></textarea>
+
+              <button class="btn btn-sm text-white w-100" style="background:#fe424d">
+                Submit Review
+              </button>
+            </form>
+          <% } else { %>
+            <p class="text-center">
+              <a href="/login">Login</a> to write a review
+            </p>
+          <% } %>
+
+          <% for (let review of listing.reviews) { %>
+            <div class="border rounded p-3 mt-3">
+
+              <div class="d-flex justify-content-between">
+                <strong>@<%= review.author.username %></strong>
+                <small class="text-muted">
+                  <%= review.createdAt.toDateString() %>
+                </small>
+              </div>
+
+              <p class="mb-1"><%= review.comment %></p>
+              <p class="text-warning mb-2">⭐ <%= review.rating %>/5</p>
+
+              <% if (currUser && review.author._id.equals(currUser._id)) { %>
+                <form
+                  method="POST"
+                  action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                  <button class="btn btn-sm btn-outline-dark">
+                    Delete
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          <% } %>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
