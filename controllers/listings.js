@@ -53,9 +53,11 @@ module.exports.createListing = async (req, res) => {
     res.redirect("/listings");
 
   } catch (err) {
-    console.error(err);
-    req.flash("error", "Something went wrong while creating listing");
-    res.redirect("/listings");
+    // console.error(err);
+    // req.flash("error", "Something went wrong while creating listing");
+    // res.redirect("/listings");
+    console.error("create listing error",err);
+    res.send(500).send(err.message);
   }
 };
 
