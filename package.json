@@ -1,6 +1,6 @@
 {
-  "engines" : {
-    "node" : "20.11.1"
+  "engines": {
+    "node": "20.11.1"
   },
   "name": "awara",
   "version": "1.0.0",

@@ -1,6 +1,7 @@
-if(process.env.NODE_ENV != "production"){
-    require('dotenv').config();
-}
+// if(process.env.NODE_ENV != "production"){
+//     require('dotenv').config();
+// }
+require('dotenv').config();
 // =====================
 // REQUIRING PACKAGES
 // =====================
@@ -35,7 +36,6 @@ app.set("views", path.join(__dirname, "views"));
 // DATABASE
 // =====================
 const dbUrl = process.env.ATLASDB_URL;
-console.log("DB URL:", process.env.ATLASDB_URL);
 mongoose.connect(process.env.ATLASDB_URL)
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
@@ -67,10 +67,10 @@ const sessionOption = {
 app.use(session(sessionOption));
 app.use(flash());
 
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const geocodingClient = mbxGeocoding({
-  accessToken: process.env.MAP_TOKEN
-});
+// const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+// const geocodingClient = mbxGeocoding({
+//   accessToken: process.env.MAP_TOKEN
+// });
 
 // =====================
 // MIDDLEWARE
@@ -96,6 +96,7 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
+    res.locals.mapToken = process.env.MAP_TOKEN; // ✅ ADD THIS
     next();
 });
 
@@ -120,15 +121,15 @@ app.use("/",userRouter);
 // ERROR HANDLING
 // =====================
 app.use((req, res, next) => {
-    next(new ExpressError(404, "Page Not Found"));
-});
+     next(new ExpressError(404, "Page Not Found"));
+ });
 
 
-app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || "Something went wrong";
-    res.status(statusCode).render("error.ejs", { message });
-});
+ app.use((err, req, res, next) => {
+     const statusCode = err.statusCode || 500;
+     const message = err.message || "Something went wrong";
+     res.status(statusCode).render("error.ejs", { message });
+ });
 
 // =====================
 // SERVER

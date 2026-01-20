@@ -1,9 +1,10 @@
 const Listing = require("../models/listing");
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+//const geocodingClient = require("../utils/geocoder");
+// const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 
-const geocodingClient = mbxGeocoding({
-  accessToken: process.env.MAP_TOKEN
-});
+// const geocodingClient = mbxGeocoding({
+//   accessToken: process.env.MAP_TOKEN
+// });
 
 // INDEX
 module.exports.index = async (req, res) => {
@@ -17,50 +18,44 @@ module.exports.renderNewForm = (req, res) => {
 };
 
 // CREATE
+const geocodingClient = require("../utils/geocoder");
+
 module.exports.createListing = async (req, res) => {
-  try {
-    const { location, country } = req.body.listing;
+  const { location, country } = req.body.listing;
 
-    const geoData = await geocodingClient
-      .forwardGeocode({
-        query: `${location}, ${country}`,
-        limit: 1
-      })
-      .send();
+  // 🔹 Convert location text → coordinates
+  const geoData = await geocodingClient
+    .forwardGeocode({
+      query: `${location}, ${country}`,
+      limit: 1
+    })
+    .send();
 
-    if (!geoData.body.features.length) {
-      req.flash("error", "Invalid location. Please enter a valid place.");
-      return res.redirect("/listings/new");
-    }
-
-    const newListing = new Listing(req.body.listing);
-    newListing.owner = req.user._id;
-
-    if (req.file) {
-      newListing.image = {
-        url: req.file.path,
-        filename: req.file.filename
-      };
-    }
-
-    newListing.geometry = {
-      type: "Point",
-      coordinates: geoData.body.features[0].geometry.coordinates
-    };
-
-    await newListing.save();
-    req.flash("success", "New Listing Created");
-    res.redirect("/listings");
-
-  } catch (err) {
-    // console.error(err);
-    // req.flash("error", "Something went wrong while creating listing");
-    // res.redirect("/listings");
-    console.error("create listing error",err);
-    res.send(500).send(err.message);
+  if (!geoData.body.features.length) {
+    req.flash("error", "Invalid location");
+    return res.redirect("/listings/new");
   }
-};
 
+  const newListing = new Listing(req.body.listing);
+  newListing.owner = req.user._id;
+
+  if (req.file) {
+    newListing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  }
+
+  // ✅ REAL coordinates for ANY city
+  newListing.geometry = {
+    type: "Point",
+    coordinates: geoData.body.features[0].geometry.coordinates
+  };
+
+  await newListing.save();
+  req.flash("success", "New Listing Created");
+  res.redirect("/listings");
+};
 // EDIT
 module.exports.renderEditForm = async (req, res) => {
   const listing = await Listing.findById(req.params.id);
@@ -80,8 +75,16 @@ module.exports.updateListing = async (req, res) => {
     const { location, country } = req.body.listing;
 
     const listing = await Listing.findById(id);
+    if (!listing) {
+      req.flash("error", "Listing not found");
+      return res.redirect("/listings");
+    }
 
-    if (location !== listing.location || country !== listing.country) {
+    // 🔥 IF location OR country changed → re-geocode
+    if (
+      location !== listing.location ||
+      country !== listing.country
+    ) {
       const geoData = await geocodingClient
         .forwardGeocode({
           query: `${location}, ${country}`,
@@ -100,8 +103,10 @@ module.exports.updateListing = async (req, res) => {
       };
     }
 
+    // 🔹 Update normal fields
     listing.set(req.body.listing);
 
+    // 🔹 Update image if new image uploaded
     if (req.file) {
       listing.image = {
         url: req.file.path,
@@ -119,7 +124,6 @@ module.exports.updateListing = async (req, res) => {
     res.redirect("/listings");
   }
 };
-
 // DELETE
 module.exports.deleteListing = async (req, res) => {
   await Listing.findByIdAndDelete(req.params.id);

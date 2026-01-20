@@ -22,7 +22,7 @@
 
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
 
-        <!-- LISTING IMAGE -->
+        <!-- IMAGE -->
         <img 
           src="<%= listing.image?.url || 'https://via.placeholder.com/800x500?text=No+Image' %>"
           class="card-img-top listing-image"
@@ -37,7 +37,7 @@
           <p class="text-muted mb-2"><%= listing.description %></p>
 
           <p class="fw-bold mb-1">
-            ₹ <%= listing.price.toLocaleString("en-IN") %> 
+            ₹ <%= listing.price.toLocaleString("en-IN") %>
             <span class="fw-normal text-muted">/ night</span>
           </p>
 
@@ -52,17 +52,14 @@
                 Edit
               </a>
               <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-                <button class="btn btn-sm btn-outline-dark">
-                  Delete
-                </button>
+                <button class="btn btn-sm btn-outline-dark">Delete</button>
               </form>
             </div>
           <% } %>
         </div>
 
-        <!-- MAP SECTION -->
+        <!-- MAP -->
         <div class="border-top">
-
           <div class="px-3 pt-3">
             <h6 class="fw-bold mb-2">Where you'll be</h6>
           </div>
@@ -78,13 +75,12 @@
 
           <% if (coords) { %>
             <img
-              src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+fe424d(<%= coords[0] %>,<%= coords[1] %>)/<%= coords[0] %>,<%= coords[1] %>,12/600x260?access_token=<%= process.env.MAP_TOKEN %>"
-              class="map-img"
-              alt="Map location">
+            class="map-img" 
+            alt="Map location"
+            src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+fe424d(<%= coords[0] %>,<%= coords[1] %>)/<%= coords[0] %>,<%= coords[1] %>,10/600x260?access_token=<%= mapToken %>">
           <% } else { %>
             <p class="text-muted px-3 pb-3">Location map not available</p>
           <% } %>
-
         </div>
 
         <!-- REVIEWS -->
@@ -126,7 +122,6 @@
 
           <% for (let review of listing.reviews) { %>
             <div class="border rounded p-3 mt-3">
-
               <div class="d-flex justify-content-between">
                 <strong>@<%= review.author.username %></strong>
                 <small class="text-muted">
@@ -141,9 +136,7 @@
                 <form
                   method="POST"
                   action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-                  <button class="btn btn-sm btn-outline-dark">
-                    Delete
-                  </button>
+                  <button class="btn btn-sm btn-outline-dark">Delete</button>
                 </form>
               <% } %>
             </div>
@@ -151,7 +144,6 @@
 
         </div>
       </div>
-
     </div>
   </div>
 </div>
