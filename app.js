@@ -50,7 +50,7 @@ const store = new MongoStore({
     },
     touchAfter : 24*3600,
 })
-store.on("error",()=>{
+store.on("error",(err)=>{
     console.log("Error in MONGO SESSION STORE",err);
 })
 const sessionOption = {
@@ -125,7 +125,8 @@ app.use((req, res, next) => {
 
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500, message = "Something went wrong" } = err;
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Something went wrong";
     res.status(statusCode).render("error.ejs", { message });
 });
 
