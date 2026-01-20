@@ -15,14 +15,13 @@ const geocodingClient = mbxGeocoding({ accessToken: mapToken});
 // VALIDATION
 // =====================
 const validateListing = (req, res, next) => {
-    const { error, value } = listingSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(", ");
-        req.flash("error", msg);
-        return res.redirect("back");
-    }
-    req.body = value;
-    next();
+  const { error } = listingSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map(el => el.message).join(", ");
+    req.flash("error", msg);
+    return res.redirect("back");
+  }
+  next(); // ✅ DO NOT overwrite req.body
 };
 
 // =====================
@@ -33,7 +32,7 @@ const validateListing = (req, res, next) => {
 router.route("/")
     .get(wrapAsync(listings.index))
     //.post(isLoggedIn, validateListing, wrapAsync(listings.createListing));
-    .post(isLoggedIn,validateListing,upload.single('image'),wrapAsync(listings.createListing));
+    .post(isLoggedIn,upload.single('image'),validateListing,wrapAsync(listings.createListing));
 
 // NEW
 router.get("/new", isLoggedIn, listings.renderNewForm);
